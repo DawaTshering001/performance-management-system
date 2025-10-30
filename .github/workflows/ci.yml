@@ -1,0 +1,59 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, feature/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      # 1️⃣ Checkout the repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2️⃣ Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4️⃣ Run Linter
+      - name: Lint code
+        run: npm run lint || echo "Lint warnings detected"
+
+      # 5️⃣ Run Unit Tests
+      - name: Run unit tests
+        run: npm test
+
+      # 6️⃣ Build Docker Image
+      - name: Build Docker Image
+        run: docker build -t performance-app .
+
+      # 7️⃣ Start Docker Container
+      - name: Run Docker Container
+        run: |
+          docker run -d -p 4000:4000 --name performance-app-test performance-app
+          sleep 5
+
+      # 8️⃣ Smoke Test (basic HTTP check)
+      - name: Smoke Test
+        run: |
+          if curl -sSf http://localhost:4000 > /dev/null; then
+            echo "Smoke Test Passed: App is running!"
+          else
+            echo "Smoke Test Failed"
+            exit 1
+          fi
+
+      # 9️⃣ Stop and Remove Docker Container
+      - name: Cleanup Docker
+        run: |
+          docker stop performance-app-test
+          docker rm performance-app-test
