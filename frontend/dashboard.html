@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Performance Management</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-indigo-100 via-blue-50 to-indigo-200">
+  <!-- Navbar -->
+  <header class="bg-white/70 backdrop-blur shadow-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+      <h1 class="text-2xl font-bold text-indigo-700">Performance Dashboard</h1>
+      <button id="logoutBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto p-6">
+    <!-- Add Entry Form -->
+    <section class="bg-white/80 backdrop-blur-lg shadow-lg rounded-3xl p-8 mb-8">
+      <h2 class="text-2xl font-semibold text-indigo-700 mb-4">Add New Performance Entry</h2>
+      <form id="performance-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" id="title" placeholder="Title" required
+               class="col-span-2 md:col-span-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none transition" />
+        <input type="number" id="rating" placeholder="Rating (1–5)" min="1" max="5" required
+               class="col-span-2 md:col-span-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none transition" />
+        <textarea id="description" placeholder="Description"
+                  class="col-span-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none transition"></textarea>
+        <input type="date" id="date" required
+               class="col-span-2 md:col-span-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none transition" />
+        <button type="submit"
+                class="col-span-2 md:col-span-1 bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">
+          Add Entry
+        </button>
+      </form>
+    </section>
+
+    <!-- Performance List -->
+    <section>
+      <h2 class="text-2xl font-semibold text-indigo-700 mb-4">Performance Records</h2>
+      <div id="performance-list" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-4 text-gray-600 bg-white/60 backdrop-blur mt-8">
+    © 2025 Performance Management System · All rights reserved
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="js/main.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'login.html';
+
+    const headers = { 'Authorization': 'Bearer ' + token };
+
+    // Fetch and display performance records
+    async function loadPerformance() {
+      const res = await fetch('http://localhost:5000/api/performance', { headers });
+      const data = await res.json();
+      const listDiv = document.getElementById('performance-list');
+      listDiv.innerHTML = '';
+
+      if (data.length === 0) {
+        listDiv.innerHTML = '<p class="text-gray-600 col-span-full text-center">No performance entries yet.</p>';
+        return;
+      }
+
+      data.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'bg-white/80 backdrop-blur-lg shadow-md rounded-2xl p-6 text-left hover:shadow-xl transition';
+        div.innerHTML = `
+          <h4 class="text-xl font-semibold text-indigo-700 mb-2">${entry.title}</h4>
+          <p class="text-gray-700 mb-2">${entry.description || 'No description provided.'}</p>
+          <p class="text-gray-600 text-sm mb-1"><strong>Rating:</strong> ${entry.rating}</p>
+          <p class="text-gray-600 text-sm mb-4"><strong>Date:</strong> ${entry.date}</p>
+          <button onclick="deleteEntry(${entry.id})"
+                  class="bg-red-500 text-white px-4 py-1 rounded-md text-sm hover:bg-red-600 transition">
+            Delete
+          </button>
+        `;
+        listDiv.appendChild(div);
+      });
+    }
+
+    // Add new performance entry
+    document.getElementById('performance-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const rating = document.getElementById('rating').value;
+      const date = document.getElementById('date').value;
+
+      await fetch('http://localhost:5000/api/performance', {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, rating: Number(rating), date })
+      });
+
+      e.target.reset();
+      loadPerformance();
+    });
+
+    // Delete entry
+    async function deleteEntry(id) {
+      await fetch(`http://localhost:5000/api/performance/${id}`, {
+        method: 'DELETE',
+        headers
+      });
+      loadPerformance();
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    });
+
+    // Load entries on page load
+    loadPerformance();
+  </script>
+</body>
+</html>

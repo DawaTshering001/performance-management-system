@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Management App</title>
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-indigo-100 via-blue-50 to-indigo-200">
+
+ <!-- Professional Header -->
+<header class="backdrop-blur-md bg-white/80 shadow-lg sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto flex justify-between items-center px-6 py-4">
+
+    <!-- Logo / Brand -->
+    <a href="index.html" class="flex items-center space-x-3">
+      <div class="bg-indigo-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow-md">
+        PM
+      </div>
+      <span class="text-2xl md:text-3xl font-bold text-indigo-700 tracking-tight hover:text-indigo-900 transition">
+        Performance Management
+      </span>
+    </a>
+
+    <!-- Navigation -->
+    <nav class="hidden md:flex items-center space-x-6">
+      <a href="index.html" class="text-gray-700 hover:text-indigo-700 font-medium transition">Home</a>
+      <a href="features.html" class="text-gray-700 hover:text-indigo-700 font-medium transition">Features</a>
+      <a href="about.html" class="text-gray-700 hover:text-indigo-700 font-medium transition">About</a>
+      <a href="contact.html" class="text-gray-700 hover:text-indigo-700 font-medium transition">Contact</a>
+      <a href="signup.html" class="bg-indigo-600 text-white px-5 py-2 rounded-lg font-semibold shadow hover:bg-indigo-700 transition">
+        Sign Up
+      </a>
+    </nav>
+
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden">
+      <button id="mobile-menu-btn" class="text-indigo-700 hover:text-indigo-900 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mobile Menu (hidden by default) -->
+  <div id="mobile-menu" class="md:hidden hidden px-6 pb-4 space-y-3 bg-white/90 backdrop-blur-md">
+    <a href="index.html" class="block text-gray-700 hover:text-indigo-700 font-medium transition">Home</a>
+    <a href="features.html" class="block text-gray-700 hover:text-indigo-700 font-medium transition">Features</a>
+    <a href="about.html" class="block text-gray-700 hover:text-indigo-700 font-medium transition">About</a>
+    <a href="contact.html" class="block text-gray-700 hover:text-indigo-700 font-medium transition">Contact</a>
+    <a href="signup.html" class="block bg-indigo-600 text-white px-5 py-2 rounded-lg font-semibold text-center shadow hover:bg-indigo-700 transition">
+      Sign Up
+    </a>
+  </div>
+</header>
+
+<!-- Mobile Menu Toggle Script -->
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  btn.addEventListener('click', () => {
+    menu.classList.toggle('hidden');
+  });
+</script>
+
+
+  <!-- Main Content -->
+  <main class="flex-grow flex items-center justify-center px-6 py-10">
+    <div class="bg-white/80 backdrop-blur-lg shadow-2xl rounded-3xl p-10 text-center max-w-3xl w-full">
+      <h2 class="text-3xl md:text-4xl font-semibold text-indigo-700 mb-4">
+        Welcome to the Performance Management System
+      </h2>
+      <p class="text-gray-600 mb-8 text-lg leading-relaxed">
+        Track, evaluate, and enhance performance across your team with ease.
+        Log in or sign up to get started today!
+      </p>
+
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a href="login.html"
+           class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-medium shadow hover:shadow-lg hover:bg-indigo-700 transition">
+          Get Started
+        </a>
+        <a href="signup.html"
+           class="border border-indigo-600 text-indigo-700 px-8 py-3 rounded-lg font-medium hover:bg-indigo-100 transition">
+          Create Account
+        </a>
+      </div>
+
+      <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=800&auto=format&fit=crop"
+           alt="Teamwork"
+           class="mt-10 rounded-2xl shadow-lg border border-indigo-100 w-full object-cover" />
+    </div>
+  </main>
+<!-- Beautiful Footer -->
+<footer class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-indigo-800 text-white mt-10">
+  <div class="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 sm:grid-cols-3 gap-8">
+
+    <!-- Brand Info -->
+    <div>
+      <h2 class="text-2xl font-bold mb-3">Performance Management</h2>
+      <p class="text-indigo-100 leading-relaxed">
+        Empowering teams to track, evaluate, and achieve excellence with data-driven performance insights.
+      </p>
+    </div>
+
+    <!-- Quick Links -->
+    <div>
+      <h3 class="text-lg font-semibold mb-3 border-b border-indigo-400 inline-block pb-1">Quick Links</h3>
+      <ul class="space-y-2">
+        <li><a href="index.html" class="hover:text-yellow-300 transition">Home</a></li>
+        <li><a href="login.html" class="hover:text-yellow-300 transition">Login</a></li>
+        <li><a href="signup.html" class="hover:text-yellow-300 transition">Sign Up</a></li>
+        <li><a href="#" class="hover:text-yellow-300 transition">Dashboard</a></li>
+      </ul>
+    </div>
+
+    <!-- Social & Contact -->
+    <div>
+      <h3 class="text-lg font-semibold mb-3 border-b border-indigo-400 inline-block pb-1">Connect With Us</h3>
+      <div class="flex space-x-4 mb-4">
+        <a href="#" class="hover:scale-110 transition-transform">
+          <i class="fab fa-facebook text-2xl hover:text-yellow-300"></i>
+        </a>
+        <a href="#" class="hover:scale-110 transition-transform">
+          <i class="fab fa-twitter text-2xl hover:text-yellow-300"></i>
+        </a>
+        <a href="#" class="hover:scale-110 transition-transform">
+          <i class="fab fa-linkedin text-2xl hover:text-yellow-300"></i>
+        </a>
+        <a href="#" class="hover:scale-110 transition-transform">
+          <i class="fab fa-instagram text-2xl hover:text-yellow-300"></i>
+        </a>
+      </div>
+      <p class="text-indigo-100 text-sm">
+        📧 support@performancemgmt.com <br />
+        📍 Thimphu, Bhutan
+      </p>
+    </div>
+  </div>
+
+  <div class="border-t border-indigo-500 text-center py-4 text-sm text-indigo-100">
+    © 2025 <span class="font-semibold">Performance Management System</span> · All rights reserved.
+  </div>
+</footer>
+
+<!-- Font Awesome Icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+
+</body>
+</html>
