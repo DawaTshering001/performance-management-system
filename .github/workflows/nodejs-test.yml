@@ -40,41 +40,47 @@ jobs:
       - name: Build Docker image
         run: docker build -t performance-app:test .
 
-      - name: Start container
+      - name: Start Docker container
         run: |
           docker run -d \
             --name performance-app-test \
             -p 4000:4000 \
             performance-app:test
-          
-          # Wait for container to be healthy (up to 30 seconds)
+
+      - name: Wait for app to start
+        run: |
           attempt_counter=0
           max_attempts=30
-          
-          until curl -s http://localhost:4000 > /dev/null || [ $attempt_counter -eq $max_attempts ]
+          until docker exec performance-app-test curl -sSf http://localhost:4000 || [ $attempt_counter -eq $max_attempts ]
           do
-            echo "Waiting for app to start... (attempt: $attempt_counter)"
-            attempt_counter=$(($attempt_counter+1))
+            echo "Waiting for app to become ready... (attempt: $attempt_counter)"
+            attempt_counter=$((attempt_counter+1))
             sleep 1
           done
-          
-          if [ $attempt_counter -eq $max_attempts ]
-          then
-            echo "Container failed to start properly"
+
+          if [ $attempt_counter -eq $max_attempts ]; then
+            echo "❌ Container failed to start properly"
+            echo "===== Container logs ====="
             docker logs performance-app-test
             exit 1
           fi
 
       - name: Smoke test
         run: |
-          # Test multiple endpoints with proper error handling
-          curl -sSf http://localhost:4000 || (echo "Homepage test failed" && exit 1)
-          curl -sSf http://localhost:4000/api/auth/status || (echo "API status test failed" && exit 1)
+          echo "✅ Running smoke tests..."
+          docker exec performance-app-test curl -sSf http://localhost:4000 || \
+            (echo "❌ Homepage test failed" && docker logs performance-app-test && exit 1)
+          docker exec performance-app-test curl -sSf http://localhost:4000/api/auth/status || \
+            (echo "❌ API status test failed" && docker logs performance-app-test && exit 1)
 
       - name: Check container logs
         if: always()
-        run: docker logs performance-app-test
+        run: |
+          echo "===== Final container logs ====="
+          docker logs performance-app-test
 
-      - name: Cleanup
+      - name: Cleanup Docker container
         if: always()
-        run: docker rm -f performance-app-test || true
+        run: |
+          docker stop performance-app-test || true
+          docker rm performance-app-test || true
