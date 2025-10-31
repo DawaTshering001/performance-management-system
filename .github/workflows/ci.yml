@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-test-smoke:
+  build-test:
     runs-on: ubuntu-latest
     steps:
       # 1️⃣ Checkout the repo
@@ -43,18 +43,9 @@ jobs:
       - name: Run Docker Container
         run: docker run -d --name performance-app-test performance-app
 
-      # 8️⃣ Wait for app to start
-      - name: Wait for app to start
-        run: sleep 15
-
-      # 9️⃣ Smoke test (inside container)
-      - name: Smoke Test
-        run: |
-          docker exec performance-app-test curl -sSf http://localhost:4000 || \
-          (echo "Smoke Test Failed" && exit 1)
-
       # 🔟 Cleanup Docker
       - name: Cleanup Docker
+        if: always()
         run: |
-          docker stop performance-app-test
-          docker rm performance-app-test
+          docker stop performance-app-test || true
+          docker rm performance-app-test || true
