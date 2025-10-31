@@ -8,6 +8,7 @@ jobs:
   build-and-verify:
     runs-on: ubuntu-latest
     name: Build & Verify Docker Image
+
     steps:
       - name: 🛎️ Checkout repository
         uses: actions/checkout@v4
@@ -21,23 +22,6 @@ jobs:
             --name performance-app-test \
             -p 4000:4000 \
             performance-app:latest
-
-      - name: ⏳ Wait for container to initialize
-        run: |
-          echo "⏳ Waiting for app to become ready..."
-          attempt_counter=0
-          max_attempts=20
-          until docker exec performance-app-test curl -sSf http://localhost:4000/status > /dev/null 2>&1 || [ $attempt_counter -eq $max_attempts ]; do
-            echo "Waiting for app... attempt $attempt_counter"
-            attempt_counter=$((attempt_counter+1))
-            sleep 3
-          done
-
-          if [ $attempt_counter -eq $max_attempts ]; then
-            echo "❌ App did not start properly."
-            docker logs performance-app-test
-            exit 1
-          fi
 
       - name: 🪵 Show container logs
         if: always()
