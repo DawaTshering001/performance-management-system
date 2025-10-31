@@ -1,51 +1,35 @@
-name: CI/CD Pipeline
+name: 🧪 CI - Build, Lint & Test
 
 on:
   push:
-    branches: [ '**' ]  # triggers on any branch
+    branches: [ "**" ] # run on all branches
   pull_request:
     branches: [ main ]
 
 jobs:
-  build-test:
+  test:
     runs-on: ubuntu-latest
+    name: Run Lint & Tests
+
     steps:
-      # 1️⃣ Checkout the repo
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: 🛎️ Checkout repository
+        uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: 🧰 Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
 
-      # 3️⃣ Install backend dependencies
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         working-directory: backend
-        run: npm install
+        run: npm ci
 
-      # 4️⃣ Lint code
-      - name: Lint code
+      - name: 🧹 Lint code
         working-directory: backend
-        run: npm run lint || echo "Lint warnings detected"
+        run: npm run lint || echo "⚠️ Lint warnings detected"
 
-      # 5️⃣ Run unit tests
-      - name: Run Unit Tests
+      - name: 🧪 Run unit tests
         working-directory: backend
         run: npm test
-
-      # 6️⃣ Build Docker image
-      - name: Build Docker Image
-        run: docker build -t performance-app .
-
-      # 7️⃣ Run Docker container
-      - name: Run Docker Container
-        run: docker run -d --name performance-app-test performance-app
-
-      # 🔟 Cleanup Docker
-      - name: Cleanup Docker
-        if: always()
-        run: |
-          docker stop performance-app-test || true
-          docker rm performance-app-test || true

@@ -1,61 +1,53 @@
-name: Node.js CI/CD
+name: 🚀 CD - Docker Build & Verification
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
-  test:
+  build-and-verify:
     runs-on: ubuntu-latest
-
+    name: Build & Verify Docker Image
     steps:
-      - uses: actions/checkout@v4
+      - name: 🛎️ Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+      - name: 🧱 Build Docker image
+        run: docker build -t performance-app:latest .
 
-      - name: Install backend dependencies
-        run: |
-          cd backend
-          npm ci
-
-      - name: Run backend tests
-        run: |
-          cd backend
-          npm test
-
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: docker build -t performance-app:test .
-
-      - name: Start Docker container
+      - name: 🧩 Start Docker container
         run: |
           docker run -d \
             --name performance-app-test \
             -p 4000:4000 \
-            performance-app:test
+            performance-app:latest
 
-      - name: Check container logs
+      - name: ⏳ Wait for container to initialize
+        run: |
+          echo "⏳ Waiting for app to become ready..."
+          attempt_counter=0
+          max_attempts=20
+          until docker exec performance-app-test curl -sSf http://localhost:4000/status > /dev/null 2>&1 || [ $attempt_counter -eq $max_attempts ]; do
+            echo "Waiting for app... attempt $attempt_counter"
+            attempt_counter=$((attempt_counter+1))
+            sleep 3
+          done
+
+          if [ $attempt_counter -eq $max_attempts ]; then
+            echo "❌ App did not start properly."
+            docker logs performance-app-test
+            exit 1
+          fi
+
+      - name: 🪵 Show container logs
         if: always()
         run: |
-          echo "===== Final container logs ====="
-          docker logs performance-app-test || echo "No logs available"
+          echo "===== Container Logs ====="
+          docker logs performance-app-test || echo "No logs found."
 
-      - name: Cleanup Docker container
+      - name: 🧹 Cleanup
         if: always()
         run: |
-          echo "🧹 Cleaning up Docker container..."
+          echo "🧹 Cleaning up Docker..."
           docker stop performance-app-test || true
           docker rm performance-app-test || true
