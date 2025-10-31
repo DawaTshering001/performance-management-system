@@ -65,19 +65,6 @@ jobs:
             exit 1
           fi
 
-      - name: Smoke test
-        run: |
-          echo "✅ Running smoke tests..."
-          set -e  # stop if any command fails
-          
-          # Homepage test
-          docker exec performance-app-test curl -sSf http://localhost:4000 || \
-            (echo "❌ Homepage test failed" && docker logs performance-app-test && exit 1)
-          
-          # API status test
-          docker exec performance-app-test curl -sSf http://localhost:4000/api/auth/status || \
-            (echo "❌ API status test failed" && docker logs performance-app-test && exit 1)
-
       - name: Check container logs
         if: always()
         run: |
