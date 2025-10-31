@@ -6,6 +6,15 @@ const jwt = require('jsonwebtoken');
 
 const db = new sqlite3.Database('./database/performance.db');
 
+// Health check endpoint
+router.get('/status', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+// Health check endpoint
+router.get('/status', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+
 db.run(`CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT UNIQUE,

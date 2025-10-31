@@ -13,7 +13,9 @@ RUN npm ci --production
 FROM node:20-slim AS runner
 WORKDIR /app
 
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r appgroup && useradd -r -g appgroup appuser
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY backend/ ./
@@ -21,6 +23,10 @@ COPY backend/ ./
 ENV NODE_ENV=production
 ENV PORT=4000
 EXPOSE 4000
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:4000/api/auth/status || exit 1
 
 USER appuser
 

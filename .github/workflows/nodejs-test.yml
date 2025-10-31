@@ -1,0 +1,80 @@
+name: Node.js CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          npm test
+
+  build-and-test:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t performance-app:test .
+
+      - name: Start container
+        run: |
+          docker run -d \
+            --name performance-app-test \
+            -p 4000:4000 \
+            performance-app:test
+          
+          # Wait for container to be healthy (up to 30 seconds)
+          attempt_counter=0
+          max_attempts=30
+          
+          until curl -s http://localhost:4000 > /dev/null || [ $attempt_counter -eq $max_attempts ]
+          do
+            echo "Waiting for app to start... (attempt: $attempt_counter)"
+            attempt_counter=$(($attempt_counter+1))
+            sleep 1
+          done
+          
+          if [ $attempt_counter -eq $max_attempts ]
+          then
+            echo "Container failed to start properly"
+            docker logs performance-app-test
+            exit 1
+          fi
+
+      - name: Smoke test
+        run: |
+          # Test multiple endpoints with proper error handling
+          curl -sSf http://localhost:4000 || (echo "Homepage test failed" && exit 1)
+          curl -sSf http://localhost:4000/api/auth/status || (echo "API status test failed" && exit 1)
+
+      - name: Check container logs
+        if: always()
+        run: docker logs performance-app-test
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f performance-app-test || true
