@@ -49,13 +49,13 @@ jobs:
 
       - name: Wait for app to start
         run: |
+          echo "⏳ Waiting for the app to become ready..."
           attempt_counter=0
           max_attempts=30
-          until docker exec performance-app-test curl -sSf http://localhost:4000 || [ $attempt_counter -eq $max_attempts ]
-          do
-            echo "Waiting for app to become ready... (attempt: $attempt_counter)"
+          until docker exec performance-app-test curl -sSf http://localhost:4000 > /dev/null 2>&1 || [ $attempt_counter -eq $max_attempts ]; do
+            echo "Waiting for app... attempt $attempt_counter"
             attempt_counter=$((attempt_counter+1))
-            sleep 1
+            sleep 2
           done
 
           if [ $attempt_counter -eq $max_attempts ]; then
@@ -68,8 +68,13 @@ jobs:
       - name: Smoke test
         run: |
           echo "✅ Running smoke tests..."
+          set -e  # stop if any command fails
+          
+          # Homepage test
           docker exec performance-app-test curl -sSf http://localhost:4000 || \
             (echo "❌ Homepage test failed" && docker logs performance-app-test && exit 1)
+          
+          # API status test
           docker exec performance-app-test curl -sSf http://localhost:4000/api/auth/status || \
             (echo "❌ API status test failed" && docker logs performance-app-test && exit 1)
 
@@ -77,10 +82,11 @@ jobs:
         if: always()
         run: |
           echo "===== Final container logs ====="
-          docker logs performance-app-test
+          docker logs performance-app-test || echo "No logs available"
 
       - name: Cleanup Docker container
         if: always()
         run: |
+          echo "🧹 Cleaning up Docker container..."
           docker stop performance-app-test || true
           docker rm performance-app-test || true
