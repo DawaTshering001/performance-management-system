@@ -2,13 +2,16 @@ version: "3.9"
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: performance_app
     ports:
-      - "4000:4000"
+      - "5000:5000"
     volumes:
-      - ./backend:/app:cached         # mount only source code
-      - node_modules:/app/node_modules  # keep container node_modules
+      - ./backend:/app:cached
+      - ./frontend:/app/frontend:cached
+      - node_modules:/app/node_modules
     environment:
       NODE_ENV: development
     command: npm run start
