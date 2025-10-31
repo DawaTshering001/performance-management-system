@@ -1,20 +1,27 @@
-# Use official Node.js LTS image
-FROM node:20-alpine
-
-# Set working directory
+# ---- deps stage ----
+FROM node:20-slim AS deps
 WORKDIR /app
 
-# Copy backend package files
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+
 COPY backend/package*.json ./
 
-# Install dependencies
-RUN npm install --production
+# Install dependencies inside Linux container
+RUN npm ci --production
 
-# Copy backend source code
+# ---- runtime stage ----
+FROM node:20-slim AS runner
+WORKDIR /app
+
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+
+COPY --from=deps /app/node_modules ./node_modules
 COPY backend/ ./
 
-# Expose port
+ENV NODE_ENV=production
+ENV PORT=4000
 EXPOSE 4000
 
-# Start the app
+USER appuser
+
 CMD ["node", "app.js"]
