@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Run Lint & Tests
+    name: Run Lint, Tests & Smoke Test
 
     steps:
       - name: 🛎️ Checkout repository
@@ -33,3 +33,18 @@ jobs:
       - name: 🧪 Run unit tests
         working-directory: backend
         run: npm test
+
+      - name: 🔥 Run smoke test
+        working-directory: backend
+        run: |
+          echo "Starting smoke test..."
+          # Start server in the background
+          nohup node app.js &
+
+          # Wait a few seconds for server to start
+          sleep 5
+
+          # Simple smoke test: check if main API endpoint responds
+          curl -f http://localhost:5000/api/auth/status || (echo "❌ Smoke test failed" && exit 1)
+
+          echo "✅ Smoke test passed"
